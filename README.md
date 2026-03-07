@@ -1,6 +1,6 @@
 # 🚀 Copilot Dash
 ![screenshot](docs/screenshot.png)
-A dashboard for viewing Copilot CLI run results, resuming sessions, and integrating with your browser via an Edge extension.
+A dashboard for viewing [CopilotShell](https://github.com/KnicKnic/copilot-pwsh) run results, resuming sessions, and integrating with your browser via an Edge extension.
 
 ## Architecture
 
@@ -47,6 +47,29 @@ npm run dev      # runs server + vite dev server with hot reload
 ```
 
 Server: http://localhost:3456 | Vite Dev: http://localhost:5173
+
+### System Tray Icon
+
+```powershell
+npm run start:tray    # starts server with system tray icon
+```
+
+The tray icon provides:
+- **Open Dashboard** — opens browser to http://localhost:3456
+- **Restart Server** — restarts the backend
+- **Exit** — stops everything
+
+### Auto-Start on Login
+
+```powershell
+# Set up auto-start (creates a Windows scheduled task)
+.\scripts\setup-autostart.ps1
+
+# Remove auto-start
+.\scripts\setup-autostart.ps1 -Remove
+```
+
+This creates a scheduled task that runs the server in the background whenever you log in. Logs go to `~/.copilot-dash/server.log`.
 
 ---
 
@@ -190,33 +213,6 @@ Place files at `<scan_dir>/.copilot_runs/<any_path>/run_details.json`:
   "gitBranch": "main"
 }
 ```
-
----
-
-## Auto-Start & System Tray
-
-### System Tray Icon
-
-```powershell
-npm run start:tray    # starts server with system tray icon
-```
-
-The tray icon provides:
-- **Open Dashboard** — opens browser to http://localhost:3456
-- **Restart Server** — restarts the backend
-- **Exit** — stops everything
-
-### Auto-Start on Login
-
-```powershell
-# Set up auto-start (creates a Windows scheduled task)
-.\scripts\setup-autostart.ps1
-
-# Remove auto-start
-.\scripts\setup-autostart.ps1 -Remove
-```
-
-This creates a scheduled task that runs the server in the background whenever you log in. Logs go to `~/.copilot-dash/server.log`.
 
 ---
 
