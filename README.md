@@ -1,5 +1,5 @@
 # 🚀 Copilot Dash
-
+![screenshot](docs/screenshot.png)
 A dashboard for viewing Copilot CLI run results, resuming sessions, and integrating with your browser via an Edge extension.
 
 ## Architecture
@@ -13,7 +13,10 @@ copilot-dash/
 └── docs/            # Documentation & example scripts
     ├── run-files.md           # Run file format spec & use cases
     └── examples/
-        └── Invoke-CopilotTask.ps1       # Wrapper that produces run_details.json
+        ├── Invoke-CopilotTask.ps1       # Wrapper that produces run_details.json
+        ├── ci-failure.prompt.md         # Example: diagnose a failed CI run
+        ├── get-failed-runs.ps1          # List failed Actions runs via gh CLI
+        └── triage-ci-failures.ps1       # Batch: pipe runs → Invoke-CopilotTask
 ```
 
 ## Quick Start
@@ -83,6 +86,14 @@ $issue = 4521
     -Name "issues/$issue" `
     -UrlRegexp "https://github\.com/owner/repo/issues/$issue" `
     -DisplayFiles "output/issues/$issue.md"
+
+# Diagnose a failed CI run — browse to the Actions run and see the report in the side panel
+$run = 14928374651
+.\Invoke-CopilotTask.ps1 "Diagnose failed CI run $run in owner/repo" `
+    -PromptFile .github/prompts/ci-failure.prompt.md `
+    -Name "ci/$run" -RunOnce `
+    -UrlRegexp "https://github\.com/owner/repo/actions/runs/$run" `
+    -DisplayFiles "ci-failures/$run.md"
 
 # Date-stamped daily report (idempotent — skips if already run today)
 $date = Get-Date -Format "yyyy-MM-dd"

@@ -161,6 +161,11 @@ your-project/
 │   │   │   └── pwsh_capture.md     # Streaming session log
 │   │   └── 4522/
 │   │       └── ...
+│   ├── ci/
+│   │   ├── 14928374651/
+│   │   │   └── run_details.json
+│   │   └── 14891234567/
+│   │       └── run_details.json
 │   ├── reports/
 │   │   ├── 2026-03-07/
 │   │   │   └── run_details.json
@@ -174,44 +179,121 @@ your-project/
 │   │   └── 4521.md             # Generated triage (displayFile)
 │   └── reports/
 │       └── 2026-03-07.md       # Generated daily report (displayFile)
+├── ci-failures/
+│   ├── 14928374651.md          # CI failure diagnosis (displayFile)
+│   └── 14891234567.md
 ├── mcp-config.json             # Generated from .vscode/mcp.json
 ├── .github/
 │   └── prompts/
 │       ├── triage.prompt.md        # Issue triage prompt
-│       └── daily-report.prompt.md  # Daily report prompt
+│       ├── daily-report.prompt.md  # Daily report prompt
+│       └── ci-failure.prompt.md    # Failed CI run diagnosis
+├── get-failed-runs.ps1             # Lists failed Actions runs via gh CLI
+├── triage-ci-failures.ps1          # Batch: pipe runs → Invoke-CopilotTask
 └── Invoke-CopilotTask.ps1          # The wrapper script
+```
+
+## Use Case: Diagnosing Failed CI Runs
+
+A real-world example: every time a CI run fails, automatically diagnose it — then browse to the failed run on GitHub and see the root cause and suggested fix in the Edge extension side panel.
+
+### The prompt: ci-failure.prompt.md
+
+[`ci-failure.prompt.md`](examples/ci-failure.prompt.md) instructs Copilot to:
+
+- Fetch the failed run logs and identify the exact failing step and error
+- Diff the triggering commit against the last passing run to find what changed
+- Attribute the failure to a specific file/line where possible
+- Produce a diagnosis with a concrete suggested fix and a confidence level
+
+### Running a single failed run
+
+```powershell
+$run = 14928374651
+.\Invoke-CopilotTask.ps1 "Diagnose failed CI run $run in owner/repo" `
+    -PromptFile .github/prompts/ci-failure.prompt.md `
+    -Name "ci/$run" `
+    -RunOnce `
+    -UrlRegexp "https://github\.com/owner/repo/actions/runs/$run" `
+    -DisplayFiles "ci-failures/$run.md"
+```
+
+Browse to `https://github.com/owner/repo/actions/runs/14928374651` — the extension icon lights up and the side panel shows the diagnosis.
+
+### Batch: diagnose all recent failures
+
+Two companion scripts in [`docs/examples/`](examples/) handle the batch workflow:
+
+**`get-failed-runs.ps1`** — queries GitHub CLI for failed runs in the past N days:
+
+```powershell
+# List failed runs as a table (human-readable)
+.\get-failed-runs.ps1 -Repo owner/repo -Days 7
+
+# Output IDs only for piping
+.\get-failed-runs.ps1 -Repo owner/repo -Days 1 -IdsOnly
+```
+
+Optional parameters: `-Workflow <name>` to filter by workflow file, `-Limit <n>` (default 100).
+
+**`triage-ci-failures.ps1`** — orchestrates the full pipeline with logging, throttling and dry-run:
+
+```powershell
+# Preview what would run (no Copilot calls)
+.	riage-ci-failures.ps1 -Repo owner/repo -Days 1 -DryRun
+
+# Run for real, process 2 runs in parallel
+.	riage-ci-failures.ps1 -Repo owner/repo -Days 1 -Throttle 2
+
+# Scope to a single workflow
+.	riage-ci-failures.ps1 -Repo owner/repo -Days 7 -Workflow ci.yml
+```
+
+Each execution is logged to `.logs/triage-ci-failures/<timestamp>.log`. The `-RunOnce` flag on `Invoke-CopilotTask.ps1` means already-diagnosed runs are skipped, so it is safe to run on a schedule without duplicating work.
+
+The resulting tree in the dashboard:
+
+```
+ci/
+├── 14928374651    ✓ 89s   claude-opus-4.6
+├── 14891234567    ✓ 112s  claude-opus-4.6
+└── 14876543210    ✓ 76s   claude-opus-4.6
 ```
 
 ## Scheduling with Task Scheduler
 
-You can use Windows Task Scheduler to run batch scripts on a schedule (e.g., every 15 minutes). Use `-WindowStyle Hidden` to prevent a console window from appearing.
+Run `triage-ci-failures.ps1` on a schedule so new CI failures are diagnosed automatically — no manual intervention required. Use `-WindowStyle Hidden` to prevent a console window from appearing.
 
-### Creating a scheduled task (PowerShell)
+### Creating a scheduled task for CI failure diagnosis
+
+Replace `owner/repo` with your GitHub repository and `C:\code\my-project` with the path where you placed the scripts.
 
 ```powershell
-# Example: run a batch script every 15 minutes, hidden
+# Run triage-ci-failures.ps1 every hour, processing runs from the last day
 $action = New-ScheduledTaskAction `
     -Execute '"C:\Program Files\PowerShell\7\pwsh.exe"' `
-    -Argument '-WindowStyle Hidden -c "C:\code\my-project\my-batch-script.ps1"' `
+    -Argument '-WindowStyle Hidden -c "C:\code\my-project\triage-ci-failures.ps1 -Repo owner/repo -Days 1"' `
     -WorkingDirectory 'C:\code\my-project'
 
 $trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) `
-    -RepetitionInterval (New-TimeSpan -Minutes 15) `
+    -RepetitionInterval (New-TimeSpan -Hours 1) `
     -RepetitionDuration (New-TimeSpan -Days 9999)
 
 Register-ScheduledTask `
-    -TaskName "CopilotDash - My Batch Task" `
+    -TaskName "CopilotDash - CI Failure Diagnosis" `
     -Action $action `
     -Trigger $trigger `
-    -Description "Run my batch script every 15 minutes"
+    -Description "Diagnose failed GitHub Actions runs every hour"
 ```
+
+Because `Invoke-CopilotTask.ps1` uses `-RunOnce`, any run already diagnosed will be skipped — so running hourly with `-Days 1` is safe and won't duplicate work.
 
 ### Task Scheduler UI settings
 
 | Field | Value |
 |-------|-------|
 | **Program/script** | `C:\Program Files\PowerShell\7\pwsh.exe` |
-| **Add arguments** | `-WindowStyle Hidden -c C:\code\my-project\my-batch-script.ps1` |
+| **Add arguments** | `-WindowStyle Hidden -c "C:\code\my-project\triage-ci-failures.ps1 -Repo owner/repo -Days 1"` |
 | **Start in** | `C:\code\my-project` |
 
 > **Tip:** Select **"Run whether user is logged on or not"** on the General tab for a fully invisible execution — no window will appear at all, regardless of `-WindowStyle Hidden`.
