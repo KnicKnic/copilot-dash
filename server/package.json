@@ -1,14 +1,23 @@
 {
-  "name": "copilot-dash-server",
+  "name": "copilot-dash",
   "version": "1.0.0",
-  "private": true,
   "type": "module",
+  "description": "Dashboard for Copilot CLI run results",
   "main": "dist/index.js",
+  "bin": {
+    "copilot-dash": "dist/cli.js"
+  },
+  "files": [
+    "dist/",
+    "public/"
+  ],
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "start:tray": "tsx src/tray.ts"
+    "start:tray": "tsx src/tray.ts",
+    "start:cli": "tsx src/cli.ts",
+    "prepublishOnly": "cd ../web && npm install && npm run build && cd ../server && npm run build"
   },
   "dependencies": {
     "@github/copilot-sdk": "^0.1.29",

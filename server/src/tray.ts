@@ -31,10 +31,18 @@ const ICON_BASE64 =
   "AAAAAAAAAAAAAA//8AAP//AADgBwAAwAMAAIABAACAAQAAAAAAAAAAAAAAAAAAAAAAAACAAQAAgAEAAMADAADgBwAA//8AAP//AAA=";
 
 async function startServer(): Promise<ChildProcess> {
-  const serverEntry = path.join(__dirname, "index.ts");
-  const child = spawn("npx", ["tsx", serverEntry], {
+  const distEntry = path.join(__dirname, "index.js");
+  const srcEntry = path.join(__dirname, "index.ts");
+
+  // Use compiled JS if available (npm publish / production), otherwise tsx for dev
+  const fs = await import("node:fs");
+  const useCompiled = fs.existsSync(distEntry);
+  const cmd = useCompiled ? process.execPath : "npx";
+  const args = useCompiled ? [distEntry] : ["tsx", srcEntry];
+
+  const child = spawn(cmd, args, {
     stdio: "pipe",
-    shell: true,
+    shell: false,
     env: { ...process.env },
   });
 
@@ -52,7 +60,8 @@ async function main() {
   let SysTray: any;
   try {
     const mod: any = await import("systray2");
-    SysTray = mod.default || mod.SysTray || mod;
+    // systray2 double-wraps: module.default.default is the constructor
+    SysTray = mod.default?.default || mod.default || mod;
   } catch {
     console.error(
       "systray2 not available. Install it with: npm install systray2"

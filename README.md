@@ -21,7 +21,21 @@ copilot-dash/
 
 ## Quick Start
 
-### One-command setup
+### Install from npm
+
+```powershell
+npm install -g copilot-dash    # install globally
+copilot-dash                   # start the server
+copilot-dash --tray            # start with system tray icon
+```
+
+Or without installing:
+
+```powershell
+npx copilot-dash
+```
+
+### From source
 
 ```powershell
 # Clone, install everything, and build
@@ -62,14 +76,29 @@ The tray icon provides:
 ### Auto-Start on Login
 
 ```powershell
-# Set up auto-start (creates a Windows scheduled task)
-.\scripts\setup-autostart.ps1
-
-# Remove auto-start
-.\scripts\setup-autostart.ps1 -Remove
+# Recommended: register autostart, start tray in background, return immediately
+copilot-dash --tray --install-autostart --detach
 ```
 
-This creates a scheduled task that runs the server in the background whenever you log in. Logs go to `~/.copilot-dash/server.log`.
+Other variations:
+
+```powershell
+copilot-dash --tray --install-autostart   # register + start (foreground)
+copilot-dash --install-autostart          # just register, don't start
+copilot-dash --remove-autostart           # unregister autostart
+```
+
+The flag is idempotent — safe to pass every time.
+
+**Platform mechanisms:**
+
+| OS | Mechanism | Location |
+|----|-----------|----------|
+| Windows | VBS in Startup folder | `%APPDATA%\...\Startup\CopilotDash.vbs` |
+| macOS | launchd plist | `~/Library/LaunchAgents/com.copilot-dash.plist` |
+| Linux | systemd user service | `~/.config/systemd/user/copilot-dash.service` |
+
+**Logs** are written to `~/.copilot-dash/server.log` (macOS/Linux via the service config; Windows via the VBS launcher's stdout redirect).
 
 ---
 

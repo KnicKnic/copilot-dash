@@ -23,7 +23,9 @@ const MAX_EVENTS = 200;
 
 // ── Config ──
 const config = loadConfig();
-const PORT = config.port || 3456;
+const PORT = process.env.COPILOT_DASH_PORT
+  ? parseInt(process.env.COPILOT_DASH_PORT, 10)
+  : config.port || 3456;
 
 // ── Express Setup ──
 const app = express();
