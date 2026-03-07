@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base styles ── */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ── Scrollbar styling ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* ── Collapsible file viewer ── */
+.file-viewer details summary {
+  cursor: pointer;
+  user-select: none;
+}
+.file-viewer details summary:hover {
+  color: #2563eb;
+}
+
+/* ── Code blocks in markdown ── */
+.prose pre {
+  @apply bg-gray-900 text-gray-100 rounded-lg p-4 overflow-x-auto text-sm;
+}
+.prose code {
+  @apply bg-gray-100 text-gray-800 rounded px-1 py-0.5 text-sm;
+}
+.prose pre code {
+  @apply bg-transparent text-gray-100 p-0;
+}
+
+/* ── Status badges ── */
+.badge-success {
+  @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800;
+}
+.badge-failure {
+  @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
+}
+
+/* ── Tab styling ── */
+.tab-active {
+  @apply border-b-2 border-blue-600 text-blue-600 font-medium;
+}
+.tab-inactive {
+  @apply border-b-2 border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300;
+}
+
+/* ── Session chat ── */
+.chat-message-user {
+  @apply bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r-lg;
+}
+.chat-message-assistant {
+  @apply bg-gray-50 border-l-4 border-gray-400 p-3 rounded-r-lg;
+}
+.chat-message-tool {
+  @apply bg-amber-50 border-l-4 border-amber-400 p-3 rounded-r-lg;
+}
+
+/* ── Session bubbles ── */
+.session-message {
+  @apply flex items-start gap-3;
+}
+.session-user {
+  @apply justify-end;
+}
+.session-assistant {
+  @apply justify-start;
+}
+.session-avatar {
+  @apply h-8 w-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center text-xs font-semibold;
+}
+.session-user .session-avatar {
+  @apply bg-blue-100 text-blue-700;
+}
+.session-bubble {
+  @apply rounded-2xl bg-white border border-gray-200 px-4 py-2 max-w-[80%] shadow-sm;
+}
+.session-user .session-bubble {
+  @apply bg-blue-600 text-white border-blue-600;
+}
+.session-user .prose {
+  @apply text-white;
+}
+.session-timestamp {
+  @apply mt-1 text-[10px] text-gray-400;
+}
+.session-tool {
+  @apply rounded-lg border border-amber-200 bg-amber-50 px-4 py-3;
+}
+.session-tool-header {
+  @apply flex items-center gap-2 text-xs font-semibold text-amber-800;
+}
+.session-tool-name {
+  @apply font-mono text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded;
+}
+.session-tool-chevron {
+  @apply text-[10px] text-amber-600 transition-transform duration-200 inline-block;
+}
+.session-tool-chevron.rotated {
+  transform: rotate(90deg);
+}
+.session-tool-summary {
+  @apply mt-2 space-y-0.5;
+}
+.session-tool-summary-line {
+  @apply text-[11px] font-mono text-amber-900/70 truncate leading-relaxed;
+}
+.session-tool-result-ok {
+  @apply text-green-700/80;
+}
+.session-tool-details {
+  @apply mt-3 space-y-3;
+}
+.session-tool-section {
+  @apply space-y-1;
+}
+.session-tool-section-label {
+  @apply text-[10px] font-semibold text-amber-700 uppercase tracking-wider;
+}
+.session-tool-code {
+  @apply text-[11px] font-mono bg-amber-100/50 border border-amber-200 rounded px-3 py-2 overflow-x-auto max-h-64 overflow-y-auto whitespace-pre-wrap break-all text-amber-950;
+}
+.session-tool-body {
+  @apply text-xs text-amber-900 mt-2;
+}
+.session-toolgroup-names {
+  @apply flex flex-wrap items-center gap-1;
+}
+.session-toolgroup-inline-summary {
+  @apply text-[11px] font-mono text-amber-700/70 truncate max-w-[50%];
+}
+.session-toolgroup-inline-result {
+  @apply text-[11px] font-semibold text-green-600;
+}
+.session-toolgroup-list {
+  @apply mt-2 space-y-1.5;
+}
+.session-toolgroup-item {
+  @apply rounded border border-amber-200/60 bg-amber-100/30 px-3 py-2;
+}
+.session-toolgroup-item-header {
+  @apply flex items-center gap-2 text-xs text-amber-800;
+}
+.session-system {
+  @apply rounded-lg border border-gray-200 bg-gray-50 px-4 py-2 text-sm text-gray-600;
+}
+
+/* ── Tree view ── */
+.tree-node {
+  @apply pl-4 border-l border-gray-200;
+}
+.tree-node-label {
+  @apply flex items-center gap-2 py-1 px-2 rounded hover:bg-gray-100 cursor-pointer;
+}
+
+/* ── Loading spinner ── */
+.spinner {
+  @apply animate-spin h-5 w-5 border-2 border-gray-300 border-t-blue-600 rounded-full;
+}

@@ -1,0 +1,31 @@
+node_modules/
+dist/
+server/dist/
+server/public/
+web/dist/
+*.js.map
+*.d.ts
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build artifacts
+*.tsbuildinfo
+
+# Extension packaging
+extension/*.zip
+extension/*.crx
+start-hidden.vbs
