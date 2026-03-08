@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "description": "Dashboard for Copilot CLI run results",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KnicKnic/copilot-dash"
+  },
   "main": "dist/index.js",
   "bin": {
     "copilot-dash": "dist/cli.js"
