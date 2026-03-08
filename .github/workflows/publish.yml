@@ -14,7 +14,8 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
+          registry-url: https://registry.npmjs.org
       # Set package version from the git tag (strips leading "v")
       - run: |
           VERSION="${GITHUB_REF_NAME#v}"
@@ -28,12 +29,5 @@ jobs:
         working-directory: server
       - run: npm run build
         working-directory: server
-      - run: |
-          echo "npm version: $(npm --version)"
-          echo "node version: $(node --version)"
-          # Remove any .npmrc that might interfere with OIDC auth
-          rm -f "$NPM_CONFIG_USERCONFIG"
-          unset NPM_CONFIG_USERCONFIG
-          unset NODE_AUTH_TOKEN
-          npm publish --provenance --access public
+      - run: npm publish --access public
         working-directory: server
