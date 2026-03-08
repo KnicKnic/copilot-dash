@@ -15,7 +15,10 @@
  */
 
 import { parseArgs } from "node:util";
-import { spawn } from "node:child_process";
+import { spawn, execSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import os from "node:os";
 import {
   installAutostart,
   removeAutostart,
@@ -73,13 +76,29 @@ if (values["install-autostart"]) {
 // ── Detach: re-spawn ourselves without --detach, then exit ──
 if (values.detach) {
   const args = process.argv.slice(2).filter((a) => a !== "--detach");
-  const child = spawn(process.execPath, [process.argv[1], ...args], {
-    detached: true,
-    stdio: "ignore",
-    env: process.env,
-  });
-  child.unref();
-  console.log(`Copilot Dash started in background (PID: ${child.pid})`);
+  const cmdArgs = [process.argv[1], ...args];
+
+  if (process.platform === "win32") {
+    // On Windows, node.exe is a console app so detached+windowsHide still
+    // shows a console window. Use a temporary VBS script to launch hidden.
+    const vbs = path.join(os.tmpdir(), `copilot-dash-detach-${process.pid}.vbs`);
+    const flagStr = args.length ? " " + args.join(" ") : "";
+    const cmd = `"""${process.execPath}"" ""${process.argv[1]}""${flagStr}"`;
+    fs.writeFileSync(vbs, [
+      'Set WshShell = CreateObject("WScript.Shell")',
+      `WshShell.Run ${cmd}, 0, False`,
+    ].join("\r\n"), "ascii");
+    execSync(`wscript.exe "${vbs}"`, { windowsHide: true });
+    fs.unlinkSync(vbs);
+  } else {
+    const child = spawn(process.execPath, cmdArgs, {
+      detached: true,
+      stdio: "ignore",
+    });
+    child.unref();
+  }
+
+  console.log("Copilot Dash started in background.");
   process.exit(0);
 }
 
