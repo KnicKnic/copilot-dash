@@ -24,9 +24,14 @@ copilot-dash/
 ### Install from npm
 
 ```powershell
-npm install -g copilot-dash    # install globally
-copilot-dash                   # start the server
-copilot-dash --tray            # start with system tray icon
+npm install -g copilot-dash
+copilot-dash --tray --install-autostart --detach   # start tray, register autostart, return immediately
+```
+
+Or just run the server directly (no autostart, no tray):
+
+```powershell
+copilot-dash
 ```
 
 Or without installing:
