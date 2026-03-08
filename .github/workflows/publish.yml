@@ -15,6 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: https://registry.npmjs.org
       # Set package version from the git tag (strips leading "v")
       - run: |
           VERSION="${GITHUB_REF_NAME#v}"
@@ -28,5 +29,9 @@ jobs:
         working-directory: server
       - run: npm run build
         working-directory: server
-      - run: npm publish --provenance --access public
+      - run: |
+          echo "npm version: $(npm --version)"
+          echo "node version: $(node --version)"
+          unset NODE_AUTH_TOKEN
+          npm publish --provenance --access public
         working-directory: server
