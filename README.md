@@ -23,6 +23,8 @@ copilot-dash/
 
 ### Install from npm
 
+> **Requires Node.js 18–22 LTS.** Node 24+ has ESM resolution changes that break a dependency (`vscode-jsonrpc`).
+
 ```powershell
 npm install -g copilot-dash
 copilot-dash --tray --install-autostart --detach   # start tray, register autostart, return immediately

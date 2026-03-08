@@ -7,6 +7,9 @@
     "type": "git",
     "url": "https://github.com/KnicKnic/copilot-dash"
   },
+  "engines": {
+    "node": ">=18 <24"
+  },
   "main": "dist/index.js",
   "bin": {
     "copilot-dash": "dist/cli.js"
